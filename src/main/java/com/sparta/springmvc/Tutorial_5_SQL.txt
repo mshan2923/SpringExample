@@ -1,0 +1,59 @@
+오른쪽 코끼리 위에 DB 선택하고 설정후에
+Jump to Query to consol 으로 아래 입력 하면 되는데
+콘솔로 데이터 베이스를 만들어 두고 , 설정에서 그 DB 선택해야됨
+
+CREATE TABLE IF NOT EXISTS MAJOR
+(
+    // 필드이름 필드타입 AUTO_INCREMENT  /  컬럼의 값이 중복되지 않게 1씩 증가하게 해줘 고유번호 생성
+    // 필드이름 필드타입 UNIQUE,  / 해당 필드는 서로 다른 값을 가져야함
+    major_code varchar(100) primary key comment '주특기코드',  //  해당 필드가 Notnull 과 Unique 제약조건을 갖음 (기본키 : 유일 값 조합)
+    major_name varchar(100) not null comment '주특기명',  //  not null -> 해당 필드는 Null 값 사용 불가
+    tutor_name varchar(100) not null comment '튜터'
+);
+CREATE TABLE IF NOT EXISTS STUDENT
+(
+    student_code varchar(100) primary key comment '수강생코드',
+    name varchar(100) not null comment '이름',
+    birth varchar(8) null comment '생년월일',
+    gender varchar(1) not null comment '성별',
+    phone varchar(11) null comment '전화번호',
+    major_code varchar(100) not null comment '주특기코드',
+    foreign key(major_code) references major(major_code) // On UPDATE CASCADE
+        // Foreign Key : 다른 테이블에 의존하게 만들어 , 데이터의 무결성을 보장 / 오른쪽 DB 우클릭해 다이얼그램으로 시각화
+        // CASCADE : FOREIGN KEY 로 연관된 데이터를 삭제,변경할 수 있습니다.
+);
+CREATE TABLE IF NOT EXISTS EXAM
+(
+    student_code varchar(100) not null comment '수강생코드',
+    exam_seq int not null comment '시험주차',
+    score decimal(10,2) not null comment '시험점수',
+    result varchar(1) not null comment '합불'
+);
+
+//-- DB 수정, 삽입
+ALTER TABLE EXAM ADD PRIMARY KEY(student_code, exam_seq);
+ALTER TABLE EXAM ADD CONSTRAINT exam_fk_student_code FOREIGN KEY(student_code) REFERENCES STUDENT(student_code);
+
+
+INSERT INTO MAJOR VALUES('m1', '스프링', '남병관');
+INSERT INTO MAJOR VALUES('m2', '노드', '강승현');
+
+INSERT INTO EXAM VALUES('s1', 1, 8.5, 'P');
+INSERT INTO EXAM VALUES('s1', 2, 9.5, 'P');
+
+//---
+
+INSERT INTO STUDENT VALUES('s0', '수강생', '20220331', 'M', '01000000005', 'm1');
+UPDATE STUDENT SET major_code= 'm2' where student_code= 's0';
+
+
+DELETE FROM STUDENT WHERE student_code = 's0';
+
+
+SELECT * FROM STUDENT;
+SELECT * FROM STUDENT WHERE STUDENT_CODE = 's1';
+SELECT name, major_code FROM STUDENT WHERE student_code = 's1';
+
+
+SELECT s.name, s.major_code, m.major_name FROM STUDENT s JOIN MAJOR m ON s.major_code = m.major_code;
+SELECT s.name, s.major_code, m.major_name FROM STUDENT s, MAJOR m WHERE s.major_code = m.major_code;
